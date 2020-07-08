@@ -65,7 +65,7 @@ void OpenContacts::begin() {
   pinMode(PIN_BUZZER, OUTPUT);
   ledcAttachPin(PIN_BUZZER, LEDC_CHANNEL);
 
-  analogSetAttenuation(ADC_0db);
+  analogSetAttenuation(ADC_2_5db);
   adcAttachPin(PIN_ADC);
   digitalWrite(PIN_RELAY, LOW);
   pinMode(PIN_RELAY, OUTPUT);

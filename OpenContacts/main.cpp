@@ -30,6 +30,7 @@
 #include <MFRC522.h>
 #include <SPI.h>
 #include "driver/adc.h"
+#include <soc/sens_reg.h>
 
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
@@ -39,9 +40,6 @@ OpenContacts oc;
 WebServer *server = NULL;
 DNSServer *dns = NULL;
 
-//static Ticker led_ticker;
-//static Ticker aux_ticker;
-//static Ticker ip_ticker;
 static Ticker restart_ticker;
 RTC_DATA_ATTR time_t now;
 static WiFiClient wificlient;
@@ -58,6 +56,11 @@ static ulong curr_utc_time = 0;
 static ulong curr_utc_hour= 0;
 static HTTPClient http;
 static bool send_logs = false;
+//ADC2 workaround
+RTC_DATA_ATTR uint64_t reg_a;
+RTC_DATA_ATTR uint64_t reg_b;
+RTC_DATA_ATTR uint64_t reg_c;
+
 void do_setup();
 void do_wake();
 
@@ -443,11 +446,18 @@ void do_sleep() {
     //reset time
     time_keeping();
   }
+  WiFi.mode(WIFI_OFF); //ADC2 workaround
+  WRITE_PERI_REG(SENS_SAR_START_FORCE_REG, reg_a);  // fix ADC registers
+  WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b);
+  WRITE_PERI_REG(SENS_SAR_MEAS_START2_REG, reg_c);
   adc_power_off();
   esp_deep_sleep_start();
 }
 
 void do_wake() {
+  reg_a = READ_PERI_REG(SENS_SAR_START_FORCE_REG);
+  reg_b = READ_PERI_REG(SENS_SAR_READ_CTRL2_REG);
+  reg_c = READ_PERI_REG(SENS_SAR_MEAS_START2_REG);
   digitalWrite(PMOS, LOW);
   SPI.begin();
   oc.play_multi_notes(4, 80, 800); // buzzer on
@@ -521,10 +531,11 @@ void process_ui()
       led_toggle_timeout = millis() + led_blink_ms;
       if(oc.state == OC_STATE_RFID && oc.get_led()) { //only read with WIFI off
         int volt = analogRead(PIN_ADC);
+        DEBUG_PRINTLN(volt);
         if (volt) {
           voltages = voltages + volt;
           volt_reads++;
-          voltage = ((voltages/volt_reads)/4095.f)*1.1f*(RB+RT)*10;
+          voltage = ((voltages/volt_reads)/4095.f)*1.5f*(RB+RT)*10;
           DEBUG_PRINTLN(voltage);
         }      
       }
