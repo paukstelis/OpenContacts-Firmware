@@ -1,7 +1,7 @@
 /* OpenContacts Firmware
  * Based on the OpenGarage Firmware
  * OpenContacts library header file
- * Mar 2016 @ OpenContacts.io
+ * July 2020 @ OpenContacts.io
  *
  * This file is part of the OpenContacts library
  *
@@ -24,7 +24,6 @@
 #define _OPENCONTACTS_H
 
 #include <Arduino.h>
-#include <FS.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
 #include <Ticker.h>
@@ -61,7 +60,6 @@ public:
   static byte get_button() { return digitalRead(PIN_BUTTON); }
   static byte get_led()    { return led_reverse?(!digitalRead(PIN_LED)):digitalRead(PIN_LED); }
   static void set_led(byte status)   { digitalWrite(PIN_LED, led_reverse?(!status):status); }
-  static void set_relay(byte status) { digitalWrite(PIN_RELAY, status); }
   static void set_dirty_bit(byte bit, byte value) {
     if(value==0) dirty_bits &= ~(1<<bit);
     else dirty_bits |= (1<<bit);
@@ -77,7 +75,6 @@ public:
   static bool read_log_end();
   static void play_note(uint freq);
   static void play_multi_notes(uint number, uint del, uint freq);
-  static void reset_alarm() { alarm = 0; }
   static void reset_to_ap() {
     options[OPTION_MOD].ival = OC_MOD_AP;
     options_save();

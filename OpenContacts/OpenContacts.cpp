@@ -1,7 +1,7 @@
 /* OpenContacts Firmware
  * Based on the OpenGarage Firmware
  * OpenContacts library
- * Mar 2016 @ OpenContacts.io
+ * July 2020 @ OpenContacts.io
  *
  * This file is part of the OpenContacts library
  *
@@ -24,10 +24,8 @@
 
 byte  OpenContacts::state = OC_STATE_INITIAL;
 File  OpenContacts::log_file;
-byte  OpenContacts::alarm = 0;
 byte  OpenContacts::led_reverse = 0;
 byte  OpenContacts::dirty_bits = 0xFF;
-//Ticker ud_ticker;
 
 static const char* config_fname = CONFIG_FNAME;
 static const char* log_fname = LOG_FNAME;
@@ -67,8 +65,6 @@ void OpenContacts::begin() {
 
   analogSetAttenuation(ADC_2_5db);
   adcAttachPin(PIN_ADC);
-  digitalWrite(PIN_RELAY, LOW);
-  pinMode(PIN_RELAY, OUTPUT);
 
   pinMode(PIN_LED, OUTPUT);
   set_led(LOW);

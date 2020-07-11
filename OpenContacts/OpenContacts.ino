@@ -1,7 +1,7 @@
 /* OpenContacts Firmware
  * Based on the OpenGarage Firmware
  * Main loop wrapper for Arduino
- * Mar 2016 @ OpenContacts.io
+ * Mar 2020 @ OpenContacts.io
  *
  * This file is part of the OpenContacts library
  *
@@ -21,12 +21,8 @@
  */
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <MFRC522.h>
-#include <SPI.h>
 #include <WiFiUdp.h>
 #include <time.h>
-#include <FS.h>
-#include <SPIFFS.h>
 #include "OpenContacts.h"
 
 struct tcp_pcb;

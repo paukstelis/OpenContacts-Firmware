@@ -1,7 +1,7 @@
 /* OpenContacts Firmware
  * Based on the OpenGarage firmware
  * Main loop
- * Mar 2016 @ OpenContacts.io
+ * July 2020 @ OpenContacts.io
  *
  * This file is part of the OpenContacts library
  *
@@ -21,7 +21,6 @@
  */
 
 #include <DNSServer.h>
-
 #include "pitches.h"
 #include "OpenContacts.h"
 #include "espconnect.h"
@@ -64,46 +63,6 @@ RTC_DATA_ATTR uint64_t reg_c;
 void do_setup();
 void do_wake();
 
-byte findKeyVal (const char *str, const char *key, char *strbuf=NULL, uint8_t maxlen=0) {
-  uint8_t found=0;
-  uint8_t i=0;
-  const char *kp;
-  kp=key;
-  while(*str &&  *str!=' ' && *str!='\n' && found==0){
-    if (*str == *kp){
-      kp++;
-      if (*kp == '\0'){
-        str++;
-        kp=key;
-        if (*str == '='){
-            found=1;
-        }
-      }
-    } else {
-      kp=key;
-    }
-    str++;
-  }
-  if(strbuf==NULL) return found; // if output buffer not provided, return right away
-
-  if (found==1){
-    // copy the value to a buffer and terminate it with '\0'
-    while(*str &&  *str!=' ' && *str!='\n' && *str!='&' && i<maxlen-1){
-      *strbuf=*str;
-      i++;
-      str++;
-      strbuf++;
-    }
-    if (!(*str) ||  *str == ' ' || *str == '\n' || *str == '&') {
-      *strbuf = '\0';
-    } else {
-      found = 0;  // Ignore partial values i.e. value length is larger than maxlen
-      i = 0;
-    }
-  }
-  return(i); // return the length of the value
-}
-
 void server_send_html_P(PGM_P content) {
   server->send_P(200, PSTR("text/html"), content);
   DEBUG_PRINT(strlen_P(content));
@@ -128,55 +87,6 @@ void server_send_result(byte code, const char* item = NULL) {
 
 void server_send_result(const char* command, byte code, const char* item = NULL) {
   if(!command) server_send_result(code, item);
-}
-
-bool get_value_by_key(const char* key, uint& val) {
-  if(server->hasArg(key)) {
-    val = server->arg(key).toInt();   
-    return true;
-  } else {
-    return false;
-  }
-}
-
-bool get_value_by_key(const char* key, String& val) {
-  if(server->hasArg(key)) {
-    val = server->arg(key);   
-    return true;
-  } else {
-    return false;
-  }
-}
-
-bool findArg(const char *command, const char *name) {
-  if(command) {
-    return findKeyVal(command, name);
-    // todo
-  } else {
-    return server->hasArg(name);
-  }
-}
-
-char tmp_buffer[TMP_BUFFER_SIZE];
-
-bool get_value_by_key(const char *command, const char *key, uint& val) {
-  if(command) {
-    byte ret = findKeyVal(command, key, tmp_buffer, TMP_BUFFER_SIZE);
-    val = String(tmp_buffer).toInt();
-    return ret;
-  } else {
-    return get_value_by_key(key, val);
-  }
-}
-
-bool get_value_by_key(const char *command, const char *key, String& val) {
-  if(command) {
-    byte ret = findKeyVal(command, key, tmp_buffer, TMP_BUFFER_SIZE);
-    val = String(tmp_buffer);
-    return ret;
-  } else {
-    return get_value_by_key(key, val);
-  }
 }
 
 void restart_in(uint32_t ms) {
@@ -248,18 +158,6 @@ void on_reset_all(){
   server_send_result(HTML_SUCCESS);
 }
 
-void debug_log() {
-  LogStruct l;
-  if (oc.read_log_start()) {
-    for(uint i=0;i<oc.options[OPTION_LSZ].ival;i++) {
-      if(!oc.read_log_next(l)) break;
-      if(!l.tstamp) continue;
-      DEBUG_PRINTLN(l.tstamp);
-    }
-  oc.read_log_end();
-  }
-}
-
 void log_data() {
     LogStruct l;
     l.tstamp = time(nullptr);
@@ -270,7 +168,6 @@ void log_data() {
     DEBUG_PRINTLN(l.tstamp);
     DEBUG_PRINTLN(l.card_uid);
     DEBUG_PRINTLN(l.voltage);
-    debug_log();
 }
 
 void on_clear_log() {
@@ -395,6 +292,7 @@ void on_ap_mac() {
 }
 
 void on_ap_change_config() {
+  //Need to do some checking. Here or javascript?
   if(curr_mode == OC_MOD_STA) return;
   if(server->hasArg("ssid")&&server->arg("ssid").length()!=0) {
     oc.options[OPTION_SSID].sval = server->arg("ssid");
@@ -447,7 +345,7 @@ void do_sleep() {
     time_keeping();
   }
   WiFi.mode(WIFI_OFF); //ADC2 workaround
-  WRITE_PERI_REG(SENS_SAR_START_FORCE_REG, reg_a);  // fix ADC registers
+  WRITE_PERI_REG(SENS_SAR_START_FORCE_REG, reg_a);
   WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b);
   WRITE_PERI_REG(SENS_SAR_MEAS_START2_REG, reg_c);
   adc_power_off();
@@ -531,7 +429,6 @@ void process_ui()
       led_toggle_timeout = millis() + led_blink_ms;
       if(oc.state == OC_STATE_RFID && oc.get_led()) { //only read with WIFI off
         int volt = analogRead(PIN_ADC);
-        DEBUG_PRINTLN(volt);
         if (volt) {
           voltages = voltages + volt;
           volt_reads++;
@@ -700,7 +597,7 @@ void do_loop() {
     if(server) server->handleClient();    
     break;
     
-  case OC_STATE_CONNECTED: //THIS IS THE MAIN LOOP
+  case OC_STATE_CONNECTED:
     if(curr_mode == OC_MOD_AP) {
       led_blink_ms = LED_SLOW_BLINK;
       dns->processNextRequest();

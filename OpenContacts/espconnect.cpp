@@ -1,7 +1,7 @@
 /* OpenContacts Firmware
  * Based on the OpenGarage Firmware
  * ESPConnect functions
- * Mar 2016 @ OpenContacts.io
+ * July 2020 @ OpenContacts.io
  *
  * This file is part of the OpenContacts library
  *

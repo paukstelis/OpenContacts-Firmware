@@ -1,7 +1,7 @@
 /* OpenContacts Firmware
  * Based on OpenGarage Firmware
  * OpenContacts macro defines and hardware pin assignments
- * Mar 2016 @ OpenContacts.io
+ * July 2020 @ OpenContacts.io
  *
  * This file is part of the OpenContacts library
  *
@@ -27,10 +27,7 @@
 #define OC_FWV    111   // Firmware version: 111 means 1.1.1
 
 /** GPIO pins */
-#define PIN_RELAY   15 //D8 on nodemcu
 #define PIN_BUTTON  0 //reset button
-#define PIN_TRIG    12 //D6 on nodemcu
-#define PIN_ECHO    14 //D5 on nodemcu
 #define PIN_LED      2
 #define PIN_RESET   16
 #define PIN_BUZZER  17
@@ -54,34 +51,8 @@
 // Log file name
 #define LOG_FNAME       "/log.dat"
 
-#define OC_MNT_CEILING  0x00
-#define OC_MNT_SIDE     0x01
-#define OC_SWITCH_LOW   0x02
-#define OC_SWITCH_HIGH  0x03
-
-#define OC_ALM_NONE     0x00
-#define OC_ALM_5        0x01
-#define OC_ALM_10       0x02
-
-#define OC_TSN_NONE     0x00
-#define OC_TSN_AM2320   0x01
-#define OC_TSN_DHT11    0x02
-#define OC_TSN_DHT22    0x03
-#define OC_TSN_DS18B20  0x04
-
 #define OC_MOD_AP       0xA9
 #define OC_MOD_STA      0x2A
-
-#define OC_AUTO_NONE    0x00
-#define OC_AUTO_NOTIFY  0x01
-#define OC_AUTO_CLOSE   0x02
-
-//Automation Option C - Notify settings
-#define OC_NOTIFY_NONE  0x00
-#define OC_NOTIFY_DO    0x01
-#define OC_NOTIFY_DC    0x02
-#define OC_NOTIFY_VL    0x04
-#define OC_NOTIFY_VA    0x08
 
 #define OC_STATE_INITIAL        0
 #define OC_STATE_CONNECTING     1
@@ -100,15 +71,6 @@ enum {
 
 #define DEFAULT_LOG_SIZE    100
 #define MAX_LOG_SIZE       500
-#define ALARM_FREQ         1000
-// door status histogram
-// number of values (maximum is 8)
-#define DOOR_STATUS_HIST_K  4
-#define DOOR_STATUS_REMAIN_CLOSED 0
-#define DOOR_STATUS_REMAIN_OPEN   1
-#define DOOR_STATUS_JUST_OPENED   2
-#define DOOR_STATUS_JUST_CLOSED   3
-#define DOOR_STATUS_MIXED         4
 
 typedef enum {
   OPTION_FWV = 0, // firmware version
@@ -130,8 +92,6 @@ typedef enum {
   NUM_OPTIONS     // number of options
 } OC_OPTION_enum;
 
-// if button is pressed for 1 seconds, report IP
-#define BUTTON_REPORTIP_TIMEOUT 800
 // if button is pressed for at least 3 seconds, reset to AP mode
 #define BUTTON_APRESET_TIMEOUT 2500
 // if button is pressed for at least 7 seconds, factory reset
